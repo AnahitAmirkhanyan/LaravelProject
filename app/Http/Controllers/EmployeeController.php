@@ -39,14 +39,14 @@ class EmployeeController extends Controller
         return redirect()->to('/employees');
     }
 
-    public function deleteEmployee(EmployeeService $employeeService, Request $request)
+    public function deleteEmployee(Request $request)
     {
-        $employeeService->deleteEmployee($request->employee_id);
+        $this->employeeService->deleteEmployee($request->employee_id);
 
         return redirect()->to('/employees')->withSuccess("Employee deleted successfully!");
     }
 
-    public function updateEmployee(EmployeeService $employeeService, EditEmployeeValidateRequest $request)
+    public function updateEmployee(EditEmployeeValidateRequest $request)
     {
         $payload = [
             'first_name' => $request->e_first_name,
@@ -54,7 +54,7 @@ class EmployeeController extends Controller
             'email' => $request->e_email,
             'company_id' => $request->e_company_id
         ];
-        $updated = $employeeService->updateEmployee($request->employee_id);
+        $updated = $this->employeeService->updateEmployee($request->employee_id);
 
         if ($updated) {
             return redirect()->to('/employees')->withSuccess("Employee edited successfully!");
