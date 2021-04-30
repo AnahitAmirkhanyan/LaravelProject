@@ -5,10 +5,16 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AddCompanyValidateRequest;
 use App\Http\Requests\EditCompanyValidateRequest;
 use App\Models\Company;
+use App\Services\CompanyService;
 use Illuminate\Http\Request;
 
 class CompanyController extends Controller
 {
+    public function __construct(CompanyService $companyService)
+    {
+        $this->companyService = $companyService;
+    }
+
     public function companies() {
         $data = Company::orderBy('created_at')->paginate(5);
 
@@ -23,28 +29,27 @@ class CompanyController extends Controller
             'phone_number' => $request->phone,
         ];
 
-        if($request->hasFile('file')){
-            $payload['logo'] = $request->file->hashName();
-            $request->file->storeAs('public', $request->file->hashName());
+        if($request->hasFile('file')) {
+            $payload['logo'] = $request->file;
         }
-        Company::create($payload);
+        $this->companyService->addCompany($payload);
 
         return redirect()->to('/companies');
     }
 
-    public function showCompanyDetails() {
-        $companies = Company::with('employees')->get();
+    public function showCompanyDetails(CompanyService $companyService) {
+        $companies = $companyService->getCompaniesWithEmployees();
 
         return view('details', ['companies' => $companies]);
     }
 
-    public function deleteCompany(Request $request) {
-        Company::destroy($request->company_id);
+    public function deleteCompany(CompanyService $companyService, Request $request) {
+        $companyService->deleteCompany($request->company_id);
 
         return redirect()->to('/companies')->withSuccess("Company deleted successfully!");
     }
 
-    public function updateCompany(EditCompanyValidateRequest $request) {
+    public function updateCompany(CompanyService $companyService, EditCompanyValidateRequest $request) {
         $payload = [
             'company_name' => $request->name,
             'email' => $request->email,
@@ -52,7 +57,7 @@ class CompanyController extends Controller
             'phone_number' => $request->phone
         ];
 
-        $updated = Company::find($request->company_id)->update($payload);
+        $updated = $companyService->updateCompany($request->company_id, $payload);
 
         if($updated) {
             return redirect()->to('/companies')->withSuccess("Company edited successfully!");
