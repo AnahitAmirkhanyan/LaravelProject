@@ -4,10 +4,10 @@
 namespace App\Services;
 
 
-use App\Interfaces\CompanyServiceInterface;
+use App\Interfaces\ICompanyService;
 use App\Models\Company;
 
-class CompanyService implements CompanyServiceInterface
+class CompanyService implements ICompanyService
 {
     public function addCompany($payload) {
 

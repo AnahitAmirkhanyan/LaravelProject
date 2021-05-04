@@ -2,7 +2,7 @@
 
 namespace App\Interfaces;
 
-interface CompanyServiceInterface
+interface ICompanyService
 {
     public function addCompany($payload);
 

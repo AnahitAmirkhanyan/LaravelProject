@@ -3,11 +3,10 @@
 
 namespace App\Services;
 
-
-use App\Interfaces\EmployeeServiceInterface;
+use App\Interfaces\IEmployeeService;
 use App\Models\Employee;
 
-class EmployeeService implements EmployeeServiceInterface
+class EmployeeService implements IEmployeeService
 {
     public function addEmployee($payload)
     {

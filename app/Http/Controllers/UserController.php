@@ -5,12 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AddUserValidateRequest;
 use App\Http\Requests\LoginUserValidateRequest;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     public function register() {
         return view('register');
     }
@@ -20,10 +27,7 @@ class UserController extends Controller
     }
 
     public function login(LoginUserValidateRequest $request) {
-        $success = Auth::attempt([
-            'email' => $request->email,
-            'password' => $request->password
-        ]);
+        $success = $this->userService->login($request);
         if($success){
             return redirect()->to('home')->withSuccess('You have successfully logged in!');
         }
@@ -39,20 +43,16 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ];
         if($request->hasFile('file')){
-            $payload['image'] = $request->file->hashName();
-            $request->file->storeAs('public', $request->file->hashName());
+            $payload['image'] = $request->file;
         }
-
-        $user = User::create($payload);
+        $user = $this->userService->createUser($payload);
         Auth::login($user);
 
         return redirect()->to('/home')->withSuccess('User created successfully!');
     }
 
     public function logout(Request $request) {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $this->userService->logout($request);
 
         return redirect('/home')->withSuccess('User has been logged out.');
     }
